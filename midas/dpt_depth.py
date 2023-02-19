@@ -134,16 +134,14 @@ class DPT(BaseModel):
         if self.scratch.stem_transpose is not None:
             path_1 = self.scratch.stem_transpose(path_1)
 
-        out = self.scratch.output_conv(path_1)
-
-        return out
+        return self.scratch.output_conv(path_1)
 
 
 class DPTDepthModel(DPT):
     def __init__(self, path=None, non_negative=True, **kwargs):
-        features = kwargs["features"] if "features" in kwargs else 256
-        head_features_1 = kwargs["head_features_1"] if "head_features_1" in kwargs else features
-        head_features_2 = kwargs["head_features_2"] if "head_features_2" in kwargs else 32
+        features = kwargs.get("features", 256)
+        head_features_1 = kwargs.get("head_features_1", features)
+        head_features_2 = kwargs.get("head_features_2", 32)
         kwargs.pop("head_features_1", None)
         kwargs.pop("head_features_2", None)
 
