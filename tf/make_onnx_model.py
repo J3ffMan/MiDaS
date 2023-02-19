@@ -1,5 +1,6 @@
 """Compute depth maps for images in the input folder.
 """
+
 import os
 import ntpath
 import glob
@@ -13,11 +14,11 @@ from torchvision import transforms
 from shutil import copyfile
 import fileinput
 import sys
-sys.path.append(os.getcwd() + '/..')
+sys.path.append(f'{os.getcwd()}/..')
                  
 def modify_file():
     modify_filename = '../midas/blocks.py'
-    copyfile(modify_filename, modify_filename+'.bak')
+    copyfile(modify_filename, f'{modify_filename}.bak')
 
     with open(modify_filename, 'r') as file :
       filedata = file.read()
@@ -31,7 +32,7 @@ def modify_file():
       
 def restore_file():
     modify_filename = '../midas/blocks.py'
-    copyfile(modify_filename+'.bak', modify_filename)
+    copyfile(f'{modify_filename}.bak', modify_filename)
 
 modify_file()
 

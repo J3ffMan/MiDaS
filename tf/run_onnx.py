@@ -27,7 +27,7 @@ def run(input_path, output_path, model_path, model_type="large"):
     # select device
     device = "CUDA:0"
     #device = "CPU"
-    print("device: %s" % device)
+    print(f"device: {device}")
 
     # network resolution
     if model_type == "large":
@@ -53,7 +53,7 @@ def run(input_path, output_path, model_path, model_type="large"):
                 resize_method="upper_bound",
                 image_interpolation_method=cv2.INTER_CUBIC,
             )
-    
+
     def compose2(f1, f2):
         return lambda x: f2(f1(x))
 
@@ -80,7 +80,7 @@ def run(input_path, output_path, model_path, model_type="large"):
         output = model.run([output_name], {input_name: img_input.reshape(1, 3, net_h, net_w).astype(np.float32)})[0]
         prediction = np.array(output).reshape(net_h, net_w)
         prediction = cv2.resize(prediction, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_CUBIC)
-       
+
         # output
         filename = os.path.join(
             output_path, os.path.splitext(os.path.basename(img_name))[0]

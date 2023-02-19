@@ -121,7 +121,7 @@ def run(input_path, output_path, model_path, model_type="dpt_beit_large_512", op
 
     # select device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print("Device: %s" % device)
+    print(f"Device: {device}")
 
     model, transform, net_w, net_h = load_model(device, model_path, model_type, optimize, height, square)
 
@@ -143,7 +143,7 @@ def run(input_path, output_path, model_path, model_type="dpt_beit_large_512", op
             print("Warning: No output path specified. Images will be processed but not shown or stored anywhere.")
         for index, image_name in enumerate(image_names):
 
-            print("  Processing {} ({}/{})".format(image_name, index + 1, num_images))
+            print(f"  Processing {image_name} ({index + 1}/{num_images})")
 
             # input
             original_image_rgb = utils.read_image(image_name)  # in [0, 1]
@@ -157,15 +157,16 @@ def run(input_path, output_path, model_path, model_type="dpt_beit_large_512", op
             # output
             if output_path is not None:
                 filename = os.path.join(
-                    output_path, os.path.splitext(os.path.basename(image_name))[0] + '-' + model_type
+                    output_path,
+                    f'{os.path.splitext(os.path.basename(image_name))[0]}-{model_type}',
                 )
                 if not side:
                     utils.write_depth(filename, prediction, grayscale, bits=2)
                 else:
                     original_image_bgr = np.flip(original_image_rgb, 2)
                     content = create_side_by_side(original_image_bgr*255, prediction, grayscale)
-                    cv2.imwrite(filename + ".png", content)
-                utils.write_pfm(filename + ".pfm", prediction.astype(np.float32))
+                    cv2.imwrite(f"{filename}.png", content)
+                utils.write_pfm(f"{filename}.pfm", prediction.astype(np.float32))
 
     else:
         with torch.no_grad():
@@ -188,10 +189,10 @@ def run(input_path, output_path, model_path, model_type="dpt_beit_large_512", op
 
                     if output_path is not None:
                         filename = os.path.join(output_path, 'Camera' + '-' + model_type + '_' + str(frame_index))
-                        cv2.imwrite(filename + ".png", content)
+                        cv2.imwrite(f"{filename}.png", content)
 
-                    alpha = 0.1
                     if time.time()-time_start > 0:
+                        alpha = 0.1
                         fps = (1 - alpha) * fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
                         time_start = time.time()
                     print(f"\rFPS: {round(fps,2)}", end="")

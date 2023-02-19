@@ -46,10 +46,10 @@ def run(input_path, output_path, model_path, model_type="large"):
         graph_def.ParseFromString(f.read())
         tf.import_graph_def(graph_def, name='')
 
-    
+
     model_operations = tf.compat.v1.get_default_graph().get_operations()
     input_node = '0:0'
-    output_layer = model_operations[len(model_operations) - 1].name + ':0'
+    output_layer = f'{model_operations[len(model_operations) - 1].name}:0'
     print("Last layer name: ", output_layer)
 
     resize_image = Resize(
@@ -61,7 +61,7 @@ def run(input_path, output_path, model_path, model_type="large"):
                 resize_method="upper_bound",
                 image_interpolation_method=cv2.INTER_CUBIC,
             )
-    
+
     def compose2(f1, f2):
         return lambda x: f2(f1(x))
 
@@ -77,31 +77,33 @@ def run(input_path, output_path, model_path, model_type="large"):
     print("start processing")
 
     with tf.compat.v1.Session() as sess:
-      try:
-        # load images
-        for ind, img_name in enumerate(img_names):
+        try:
+            # load images
+            for ind, img_name in enumerate(img_names):
 
-            print("  processing {} ({}/{})".format(img_name, ind + 1, num_images))
+                print("  processing {} ({}/{})".format(img_name, ind + 1, num_images))
 
-            # input
-            img = utils.read_image(img_name)
-            img_input = transform({"image": img})["image"]
+                # input
+                img = utils.read_image(img_name)
+                img_input = transform({"image": img})["image"]
 
-            # compute
-            prob_tensor = sess.graph.get_tensor_by_name(output_layer)
-            prediction, = sess.run(prob_tensor, {input_node: [img_input] })
-            prediction = prediction.reshape(net_h, net_w)
-            prediction = cv2.resize(prediction, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_CUBIC)
-            
-            # output
-            filename = os.path.join(
-                output_path, os.path.splitext(os.path.basename(img_name))[0]
+                # compute
+                prob_tensor = sess.graph.get_tensor_by_name(output_layer)
+                prediction, = sess.run(prob_tensor, {input_node: [img_input] })
+                prediction = prediction.reshape(net_h, net_w)
+                prediction = cv2.resize(prediction, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_CUBIC)
+
+                # output
+                filename = os.path.join(
+                    output_path, os.path.splitext(os.path.basename(img_name))[0]
+                )
+                utils.write_depth(filename, prediction, bits=2)
+
+        except KeyError:
+            print(
+                f"Couldn't find input node: ' + input_node + ' or output layer: {output_layer}."
             )
-            utils.write_depth(filename, prediction, bits=2)
-
-      except KeyError:
-        print ("Couldn't find input node: ' + input_node + ' or output layer: " + output_layer + ".")
-        exit(-1)
+            exit(-1)
 
     print("finished")
 

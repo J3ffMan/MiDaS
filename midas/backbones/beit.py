@@ -50,7 +50,7 @@ def _get_rel_pos_bias(self, window_size):
     new_relative_position_bias_table = torch.cat(
         [new_sub_table, old_relative_position_bias_table[old_num_relative_distance - 3:]])
 
-    key = str(window_size[1]) + "," + str(window_size[0])
+    key = f"{str(window_size[1])},{str(window_size[0])}"
     if key not in self.relative_position_indices.keys():
         self.relative_position_indices[key] = gen_relative_position_index(window_size)
 
